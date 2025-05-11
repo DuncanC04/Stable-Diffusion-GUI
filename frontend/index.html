@@ -2,17 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Image Generator</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <div class="container">
-    <h1>AI Image Generator</h1>
-    <input type="text" id="prompt" placeholder="Enter image prompt..." />
+    <h1>Stable Diffusion 3 Image Generator</h1>
+    <input type="text" id="prompt" placeholder="Enter your prompt here..." />
     <button onclick="generateImage()">Generate</button>
-    <div id="result">
-      <img id="generatedImage" src="" alt="Generated image will appear here" />
+    <div id="loading">Generating...</div>
+    <div id="output">
+      <img id="resultImage" src="" alt="" />
     </div>
   </div>
   <script src="script.js"></script>

@@ -1,36 +1,41 @@
 body {
     font-family: sans-serif;
-    background: #f0f0f0;
+    background: #111;
+    color: #fff;
     text-align: center;
-    padding: 40px;
+    margin: 0;
+    padding: 2em;
   }
   
   .container {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    max-width: 500px;
+    max-width: 600px;
     margin: auto;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   }
   
-  input {
-    width: 80%;
+  input[type="text"] {
+    width: 100%;
     padding: 10px;
-    margin: 20px 0;
-    font-size: 1rem;
+    font-size: 16px;
+    margin-top: 1em;
   }
   
   button {
+    margin-top: 1em;
     padding: 10px 20px;
-    font-size: 1rem;
+    font-size: 16px;
     cursor: pointer;
   }
   
-  #generatedImage {
-    margin-top: 20px;
-    max-width: 100%;
-    border-radius: 8px;
+  #loading {
     display: none;
+    margin-top: 1em;
+  }
+  
+  #output img {
+    margin-top: 1em;
+    border-radius: 8px;
+    width: 128px;
+    height: 128px;
+    object-fit: cover;
   }
   
