@@ -1,89 +1,56 @@
-from flask import Flask, render_template, request, jsonify
+#Packages
 import os
+os.environ["KERAS_BACKEND"] = "jax"
 import base64
-from io import BytesIO
-import logging
-import numpy as np
-from PIL import Image
+import io
+from flask import Flask, request, jsonify, send_from_directory
 import keras
 import keras_hub
+import numpy as np
+from PIL import Image
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+#Load Stable Diffusion 3 model
+#From Keras Example
+backbone = keras_hub.models.StableDiffusion3Backbone.from_preset(
+    "stable_diffusion_3_medium", image_shape=(256, 256, 3), dtype="float32"
+)
+preprocessor = keras_hub.models.StableDiffusion3TextToImagePreprocessor.from_preset(
+    "stable_diffusion_3_medium"
+)
+text_to_image = keras_hub.models.StableDiffusion3TextToImage(backbone, preprocessor)
 
-# Set Keras backend to JAX
-os.environ["KERAS_BACKEND"] = "jax"
+app = Flask(__name__) #Create Flask app
 
-app = Flask(__name__, template_folder='.')
+#Serve the static HTML file
+@app.route("/")
+def index():
+    return send_from_directory(".", "index.html")
 
-# Initialize the model
-try:
-    logger.info("Initializing Stable Diffusion 3 model...")
-    backbone = keras_hub.models.StableDiffusion3Backbone.from_preset(
-        "stable_diffusion_3_medium", 
-        image_shape=(128, 128, 3), 
-        dtype="float16"
-    )
-    preprocessor = keras_hub.models.StableDiffusion3TextToImagePreprocessor.from_preset(
-        "stable_diffusion_3_medium"
-    )
-    text_to_image = keras_hub.models.StableDiffusion3TextToImage(backbone, preprocessor)
-    logger.info("Model initialized successfully")
-except Exception as e:
-    logger.error(f"Error initializing model: {str(e)}")
-    raise
-
-def generate_image(prompt: str) -> bytes:
-    """Generate an image from the given prompt."""
-    try:
-        # Generate the image
-        generated_image = text_to_image.generate(prompt)
-        
-        # Convert numpy array to PIL Image
-        if isinstance(generated_image, np.ndarray):
-            if generated_image.ndim == 3:
-                image = Image.fromarray(generated_image)
-            elif generated_image.ndim == 4:
-                image = Image.fromarray(np.concatenate(list(generated_image), axis=1))
-        else:
-            raise ValueError("Unsupported image format")
-        
-        # Convert PIL Image to bytes
-        buffered = BytesIO()
-        image.save(buffered, format="PNG")
-        return buffered.getvalue()
-        
-    except Exception as e:
-        logger.error(f"Error generating image: {str(e)}")
-        raise
-
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/generate', methods=['POST'])
+@app.route("/generate", methods=["POST"])
 def generate():
+    data = request.get_json()
+    prompt = data.get("prompt", "").strip()
+
+    if not prompt:
+        return jsonify({"error": "Prompt is required"}), 400
+
     try:
-        data = request.get_json()
-        prompt = data.get('prompt', '')
-        
-        if not prompt:
-            return jsonify({'error': 'No prompt provided'}), 400
+        #Generate image from prompt
+        images = text_to_image.generate(prompt, num_images=1, seed=42)
+        image_array = images[0]
+        image = Image.fromarray(image_array)
 
-        logger.info(f"Generating image for prompt: {prompt}")
-        image_data = generate_image(prompt)
-        
-        # Convert image data to base64
-        img_str = base64.b64encode(image_data).decode()
-        
-        return jsonify({
-            'image': img_str,
-            'status': 'success'
-        })
+        #Convert image to base64
+        buffer = io.BytesIO()
+        image.save(buffer, format="PNG")
+        buffer.seek(0)
+        img_base64 = base64.b64encode(buffer.read()).decode("utf-8")
+
+        return jsonify({"image": img_base64})
+
+    #Catch any errors
     except Exception as e:
-        logger.error(f"Error in generate endpoint: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000) 
+if __name__ == "__main__":
+    app.run(debug=True)

@@ -67,7 +67,7 @@
                     <label for="prompt" class="block text-gray-700 text-sm font-bold mb-2">Enter your prompt:</label>
                     <textarea id="prompt" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Describe the image you want to generate..."></textarea>
                 </div>
-                <button onclick="generateImage()" class="w-full gradient-bg text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">
+                <button onclick="generateImage()" class="w-full gradient-bg text-white font-bold py-3 px-4 rounded-lg hover:opacity-80 transition-opacity">
                     Generate Image
                 </button>
             </div>
@@ -75,8 +75,8 @@
             <!-- Generated Image -->
             <div id="result" class="bg-white rounded-lg shadow-lg p-6 hidden">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Generated Image</h2>
-                <div class="aspect-w-1 aspect-h-1">
-                    <img id="generated-image" class="w-full h-full object-contain rounded-lg" alt="Generated image">
+                <div class="flex justify-center">
+                    <img id="generated-image" class="max-w-full max-h-[256px] rounded-lg" alt="Generated image">
                 </div>
             </div>
 
